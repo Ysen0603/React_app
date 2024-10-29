@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
 
 const API_URL = 'http://192.168.1.4:8000'; // Remplacez par l'adresse IP locale de votre serveur
 
@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+
 
   useEffect(() => {
     // Charger le token stocké au démarrage
@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }) => {
       setToken(accessToken);
       await AsyncStorage.setItem('token', accessToken);
       await fetchUser(accessToken);
-      router.push('(app)/Index'); // Rediriger vers la page de profil après connexion
+      router.replace('(app)/Index'); // Rediriger vers la page de profil après connexion
     } catch (error) {
       console.error('Login error:', error);
       throw new Error('Login failed');
@@ -87,7 +87,7 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ name, email, password }),
       });
       if (!response.ok) throw new Error('Signup failed');
-      router.push('(app)/(Login)/Login'); // Rediriger vers la page de connexion après inscription
+      router.replace('(app)/(Login)/Login'); // Rediriger vers la page de connexion après inscription
     } catch (error) {
       console.error('Signup error:', error);
       throw new Error('Signup failed');
@@ -96,10 +96,11 @@ export const AuthProvider = ({ children }) => {
 
   // Fonction de déconnexion
   const logout = async () => {
+    router.replace('(app)/(Login)/Login'); // Rediriger vers la page de connexion
+
     setToken(null);
     setUser(null);
     await AsyncStorage.removeItem('token');
-    router.push('(app)/(Login)/Login'); // Rediriger vers la page de connexion
   };
   // Add these functions inside the AuthProvider component
 const followUser = async (userId) => {
@@ -199,6 +200,26 @@ const getFollowing = async () => {
     return [];
   }
 };
+const togglePrivacy = async () => {
+  try {
+    const response = await fetch(`${API_URL}/users/toggle-privacy`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (response.ok) {
+      const updatedUser = await response.json();
+      setUser(updatedUser);
+      return true;
+    }
+  } catch (error) {
+    console.error('Error toggling privacy:', error);
+    return false;
+  }
+};
+
 
   return (
     <AuthContext.Provider
@@ -216,6 +237,7 @@ const getFollowing = async () => {
         getFollowers,
         getAllUsers,
         checkIsFollowing,
+        togglePrivacy,
       }}
     >
     {!loading && children}

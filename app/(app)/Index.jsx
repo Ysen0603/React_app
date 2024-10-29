@@ -347,7 +347,7 @@ const Index = () => {
       {user ? (
         <View style={styles.mainContainer}>
           <View style={styles.header}>
-            <TouchableOpacity onPress={() => router.push('/(app)/(Profile)/Index')}>
+            <TouchableOpacity onPress={() => router.push('/(app)/Profile/Index')}>
             <View style={styles.userInfo}>
               <Image
                 source={{ uri: `http://192.168.1.4:8000${user.profile_image}` || 'https://via.placeholder.com/40' }}

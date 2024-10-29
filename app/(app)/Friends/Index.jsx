@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator } from 'react-native'
-import React, { useContext, useState, useEffect } from 'react'
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator, Pressable } from 'react-native'
+import React, { useContext, useState, useEffect,useCallback } from 'react'
 import { AuthContext } from '../../Context/Auth'
 import { useTheme } from '../../Context/ThemeContext'
 import { lightTheme, darkTheme } from '../../themes'
 import { Ionicons } from '@expo/vector-icons'
+import { router,useFocusEffect } from 'expo-router'
 
 const Index = () => {
   const { user, token, getAllUsers, followUser, unfollowUser, checkIsFollowing } = useContext(AuthContext)
@@ -13,6 +14,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true)
   const [userFollowers, setUserFollowers] = useState({})
   const [followingStatus, setFollowingStatus] = useState({})
+
 
   const fetchUserFollowers = async (userId) => {
     try {
@@ -28,6 +30,7 @@ const Index = () => {
           ...prev,
           [userId]: followers
         }));
+        
       }
     } catch (error) {
       console.error('Error fetching followers:', error);
@@ -75,11 +78,16 @@ const Index = () => {
       console.error('Error toggling follow status:', error);
     }
   };
+  useFocusEffect(
+    useCallback(() => {
+      loadUsers();
+    }, [])
+  );
 
   const renderUserItem = ({ item }) => {
     const isFollowing = followingStatus[item.id] || false;
     const followersCount = userFollowers[item.id]?.length || 0;
-
+    
     return (
       <View style={[styles.userCard, { backgroundColor: theme.cardBackground }]}>
         <Image
@@ -90,13 +98,14 @@ const Index = () => {
           }}
           style={styles.avatar}
         />
-        <View style={styles.userInfo}>
+        <Pressable style={styles.userInfo} onPress={() => router.push(`/(app)/Profile/${item.id}`)}>
           <Text style={[styles.userName, { color: theme.textColor }]}>{item.name}</Text>
           <Text style={[styles.userEmail, { color: theme.secondaryTextColor }]}>{item.email}</Text>
           <Text style={[styles.followersCount, { color: theme.secondaryTextColor }]}>
             {followersCount} followers
           </Text>
-        </View>
+          
+        </Pressable>
         <TouchableOpacity
           style={[
             styles.followButton,
@@ -119,6 +128,18 @@ const Index = () => {
   };
 
   const styles = StyleSheet.create({
+    profileImages: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 8,
+    },
+    avatar_mini: {
+      width: 30,
+      height: 30,
+      borderRadius: 15,
+      marginLeft: -10,
+      borderWidth: 1,
+    },
     container: {
       flex: 1,
       backgroundColor: theme.backgroundColor,

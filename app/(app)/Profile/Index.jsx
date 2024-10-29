@@ -12,7 +12,7 @@ const { width } = Dimensions.get('window')
 const ITEM_WIDTH = width / 2 - 24
 
 const Index = () => {
-  const { user, logout, token, setUser, getFollowing,getFollowers} = useContext(AuthContext)
+  const { user, logout, token, setUser, getFollowing,getFollowers,togglePrivacy} = useContext(AuthContext)
   const { isDarkTheme } = useTheme()
   const theme = isDarkTheme ? darkTheme : lightTheme
   const [userPosts, setUserPosts] = useState([])
@@ -377,6 +377,13 @@ const Index = () => {
       </ScrollView>
 
       <View style={styles.bottomMenu}>
+        <TouchableOpacity style={styles.menuButton} onPress={togglePrivacy}>
+          <Ionicons 
+            name={user?.is_private ? "lock-closed-outline" : "lock-open-outline"} 
+            size={24} 
+            color={theme.textColor} 
+          />
+        </TouchableOpacity>
         <TouchableOpacity style={styles.menuButton}>
           <Ionicons name="settings-outline" size={24} color={theme.textColor} />
         </TouchableOpacity>
@@ -386,6 +393,7 @@ const Index = () => {
         <TouchableOpacity style={styles.logoutButton} onPress={logout}>
           <Ionicons name="log-out-outline" size={24} color={theme.dangerColor} />
         </TouchableOpacity>
+
       </View>
     </View>
   )

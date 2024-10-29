@@ -2,17 +2,17 @@ import React, { useContext ,useEffect} from 'react';
 import { AuthContext } from '../Context/Auth';
 import { useTheme } from '../Context/ThemeContext';
 import { lightTheme, darkTheme } from '../themes';
-import { useRouter, Stack } from 'expo-router';
-import { TouchableOpacity, StyleSheet, View, Text } from 'react-native';
+import { router, Stack } from 'expo-router';
+import { TouchableOpacity, StyleSheet, View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { StatusBar } from 'react-native';
+
 
 const Layout = () => {
   const { user, logout } = useContext(AuthContext);
   const { isDarkTheme,toggleTheme } = useTheme();
   const theme = isDarkTheme ? darkTheme : lightTheme;
-  const router = useRouter();;
+  
 
   useEffect(() => {
     if (!user) {
@@ -22,10 +22,10 @@ const Layout = () => {
 
   const CustomHeader = () => (
     <View style={styles.headerContainer}>
-      <View style={styles.logoContainer}>
+      <Pressable style={styles.logoContainer} onPress={() => router.replace('/Index')}>
         <Ionicons name="book" size={24} color={theme.buttonColor} />
         <Text style={styles.logoText}>Blog App</Text>
-      </View>
+      </Pressable>
       <View style={styles.headerRight}>
         <TouchableOpacity 
           style={styles.iconButton}
@@ -45,7 +45,7 @@ const Layout = () => {
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.iconButton}
-          onPress={() => router.push('/(Videos_Reels)/Index')}
+          onPress={() => router.push('/Videos_Reels/Index')}
         >
           <MaterialIcons name="ondemand-video" size={24} color={theme.textColor} />
         </TouchableOpacity>
@@ -60,7 +60,7 @@ const Layout = () => {
     </View>
   );
   const CustomLoginHeader = () => (
-    <View style={styles.headerContainer}>
+    <View style={styles.headerContainer} >
       <View style={styles.logoContainer}>
         <Ionicons name="book" size={24} color="#007AFF" />
         <Text style={styles.logoText}>Blog App</Text>
@@ -143,14 +143,14 @@ const Layout = () => {
         }}
       />
       <Stack.Screen
-        name="(Profile)/Index"
+        name="Profile/Index"
         options={{
           header: () => <CustomHeader />,
           
         }}
         />
      <Stack.Screen
-  name="(Videos_Reels)/Index"
+  name="Videos_Reels/Index"
   options={{
     headerShown: false
   }}
@@ -168,6 +168,14 @@ const Layout = () => {
     
   }}
 />
+<Stack.Screen
+  name="Profile/[id]"
+  options={{
+    header: () => <CustomHeader />,
+    
+  }}
+/>
+
 
       
     </Stack>
