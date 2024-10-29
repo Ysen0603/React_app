@@ -161,6 +161,13 @@ const Layout = () => {
     headerShown: false
   }}
 />
+<Stack.Screen
+  name="Friends/Index"
+  options={{
+    header: () => <CustomHeader />,
+    
+  }}
+/>
 
       
     </Stack>

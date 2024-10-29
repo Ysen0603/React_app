@@ -5,28 +5,44 @@ import { useTheme } from '../../Context/ThemeContext'
 import { lightTheme, darkTheme } from '../../themes'
 import { Ionicons } from '@expo/vector-icons'
 import { Video } from 'expo-av'
-import * as ImagePicker from 'expo-image-picker';
-
+import * as ImagePicker from 'expo-image-picker'
+import { router } from 'expo-router'
 
 const { width } = Dimensions.get('window')
 const ITEM_WIDTH = width / 2 - 24
 
 const Index = () => {
-  const { user, logout, token, setUser } = useContext(AuthContext);
+  const { user, logout, token, setUser, getFollowing,getFollowers} = useContext(AuthContext)
   const { isDarkTheme } = useTheme()
   const theme = isDarkTheme ? darkTheme : lightTheme
   const [userPosts, setUserPosts] = useState([])
+  const [following, setFollowing] = useState([])
+  const [followers, setFollowers] = useState([])
+
+  useEffect(() => {
+    const loadFollowData = async () => {
+      const followingData = await getFollowing()
+      const followersData = await getFollowers()
+      setFollowers(followersData)
+      setFollowing(followingData)
+    }
+    
+    if (user) {
+      loadFollowData()
+    }
+  }, [user])
+
   const updateProfileImage = async (imageFile) => {
     try {
-      const formData = new FormData();
-      const filename = imageFile.uri.split('/').pop();
-      const fileExtension = filename.split('.').pop();
+      const formData = new FormData()
+      const filename = imageFile.uri.split('/').pop()
+      const fileExtension = filename.split('.').pop()
       
       formData.append('profile_image', {
         uri: imageFile.uri,
         type: 'image/jpeg',
         name: `profile_image.${fileExtension}`
-      });
+      })
   
       const response = await fetch('http://192.168.1.4:8000/users/profile-image/', {
         method: 'PUT',
@@ -34,16 +50,17 @@ const Index = () => {
           Authorization: `Bearer ${token}`
         },
         body: formData
-      });
+      })
   
       if (response.ok) {
-        const updatedUser = await response.json();
-        setUser(updatedUser);
+        const updatedUser = await response.json()
+        setUser(updatedUser)
       }
     } catch (error) {
-      console.error('Error updating profile image:', error);
+      console.error('Error updating profile image:', error)
     }
-  };
+  }
+
   const confirmDelete = (postId) => {
     Alert.alert(
       "Delete Post",
@@ -59,7 +76,6 @@ const Index = () => {
           style: "destructive"
         }
       ]
-
     )
   }
 
@@ -77,19 +93,20 @@ const Index = () => {
       console.error('Error deleting post:', error)
     }
   }
-// Add this function to handle image picker
-const pickProfileImage = async () => {
-  const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    allowsEditing: true,
-    aspect: [1, 1],
-    quality: 1,
-  });
 
-  if (!result.canceled) {
-    updateProfileImage(result.assets[0]);
+  const pickProfileImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    })
+
+    if (!result.canceled) {
+      updateProfileImage(result.assets[0])
+    }
   }
-};
+
   useEffect(() => {
     const fetchUserPosts = async () => {
       try {
@@ -105,6 +122,7 @@ const pickProfileImage = async () => {
     }
     fetchUserPosts()
   }, [user, token])
+
   const styles = StyleSheet.create({
     mainContainer: {
       flex: 1,
@@ -204,14 +222,6 @@ const pickProfileImage = async () => {
       backgroundColor: theme.cardBackground,
       borderRadius: 15,
       padding: 5,
-      shadowColor: theme.shadowColor,
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 3.84,
-      elevation: 5,
     },
     postMedia: {
       width: '100%',
@@ -276,21 +286,22 @@ const pickProfileImage = async () => {
       padding: 10,
     },
   })
+
   return (
     <View style={styles.mainContainer}>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.headerSection}>
           <View style={styles.profileInfo}>
-          <TouchableOpacity onPress={pickProfileImage}>
-          <Image 
-            source={{ 
-              uri: user?.profile_image 
-                ? `http://192.168.1.4:8000${user.profile_image}` 
-                : 'https://via.placeholder.com/150' 
-            }}
-            style={styles.avatar}
-          />
-        </TouchableOpacity>
+            <TouchableOpacity onPress={pickProfileImage}>
+              <Image 
+                source={{ 
+                  uri: user?.profile_image 
+                    ? `http://192.168.1.4:8000${user.profile_image}` 
+                    : 'https://via.placeholder.com/150' 
+                }}
+                style={styles.avatar}
+              />
+            </TouchableOpacity>
             <View style={styles.userInfo}>
               <Text style={styles.name}>{user?.name}</Text>
               <Text style={styles.email}>{user?.email}</Text>
@@ -304,12 +315,12 @@ const pickProfileImage = async () => {
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>12.5k</Text>
+              <Text style={styles.statNumber}>{followers.length}</Text>
               <Text style={styles.statLabel}>Followers</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>890</Text>
+              <Text style={styles.statNumber}>{following.length}</Text>
               <Text style={styles.statLabel}>Following</Text>
             </View>
           </View>
@@ -324,7 +335,7 @@ const pickProfileImage = async () => {
                   style={styles.deleteButton}
                   onPress={() => confirmDelete(post.id)}
                 >
-                  <Ionicons name="trash-outline" size={20} color="#ff4757" />
+                  <Ionicons name="trash-outline" size={20} color={theme.dangerColor} />
                 </TouchableOpacity>
                 {post.image_url ? (
                   <Image
@@ -341,7 +352,7 @@ const pickProfileImage = async () => {
                       isLooping
                     />
                     <View style={styles.videoOverlay}>
-                      <Ionicons name="play-circle" size={40} color="#fff" />
+                      <Ionicons name="play-circle" size={40} color={theme.textColor} />
                     </View>
                   </View>
                 ) : (
@@ -369,17 +380,15 @@ const pickProfileImage = async () => {
         <TouchableOpacity style={styles.menuButton}>
           <Ionicons name="settings-outline" size={24} color={theme.textColor} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuButton}>
+        <TouchableOpacity style={styles.menuButton} onPress={() => router.push('/Friends/Index')}>
           <Ionicons name="person-outline" size={24} color={theme.textColor} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-          <Ionicons name="log-out-outline" size={24} color="#ff4757" />
+          <Ionicons name="log-out-outline" size={24} color={theme.dangerColor} />
         </TouchableOpacity>
       </View>
     </View>
   )
 }
-
-
 
 export default Index

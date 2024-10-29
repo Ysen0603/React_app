@@ -101,6 +101,104 @@ export const AuthProvider = ({ children }) => {
     await AsyncStorage.removeItem('token');
     router.push('(app)/(Login)/Login'); // Rediriger vers la page de connexion
   };
+  // Add these functions inside the AuthProvider component
+const followUser = async (userId) => {
+  try {
+    const response = await fetch(`${API_URL}/users/${userId}/follow`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error('Failed to follow user');
+    await fetchUser(token); // Refresh user data
+    return true;
+  } catch (error) {
+    console.error('Follow error:', error);
+    return false;
+  }
+};
+
+const unfollowUser = async (userId) => {
+  try {
+    const response = await fetch(`${API_URL}/users/${userId}/unfollow`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error('Failed to unfollow user');
+    await fetchUser(token); // Refresh user data
+    return true;
+  } catch (error) {
+    console.error('Unfollow error:', error);
+    return false;
+  }
+};
+const checkIsFollowing = async (userId) => {
+  try {
+    const response = await fetch(`${API_URL}/users/${userId}/is-following`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error('Failed to check following status');
+    return await response.json();
+  } catch (error) {
+    console.error('Check following status error:', error);
+    return false;
+  }
+};
+
+
+const getFollowing = async () => {
+  try {
+    const response = await fetch(`${API_URL}/users/me/following`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error('Failed to get following list');
+    return await response.json();
+  } catch (error) {
+    console.error('Get following error:', error);
+    return [];
+  }
+};
+  const getFollowers = async () => {
+    try {
+      const response = await fetch(`${API_URL}/users/me/followers`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) throw new Error('Failed to get followers list');
+      return await response.json();
+    } catch (error) {
+      console.error('Get followers error:', error);
+      return [];
+    }
+  };
+  const getAllUsers = async () => {
+  try {
+    const response = await fetch(`${API_URL}/users/`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error('Failed to get users list');
+    return await response.json();
+  } catch (error) {
+    console.error('Get users error:', error);
+    return [];
+  }
+};
 
   return (
     <AuthContext.Provider
@@ -112,9 +210,16 @@ export const AuthProvider = ({ children }) => {
         logout,
         loading,
         setUser,
+        followUser,
+        unfollowUser,
+        getFollowing,
+        getFollowers,
+        getAllUsers,
+        checkIsFollowing,
       }}
     >
-      {!loading && children}
-    </AuthContext.Provider>
+    {!loading && children}
+  </AuthContext.Provider>
+
   );
 };
