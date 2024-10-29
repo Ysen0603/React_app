@@ -9,7 +9,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 
 const Layout = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout,notificationCount, checkNotifications } = useContext(AuthContext);
   const { isDarkTheme,toggleTheme } = useTheme();
   const theme = isDarkTheme ? darkTheme : lightTheme;
   
@@ -20,7 +20,12 @@ const Layout = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    const interval = setInterval(checkNotifications, 30000); // Check every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
   const CustomHeader = () => (
+    
     <View style={styles.headerContainer}>
       <Pressable style={styles.logoContainer} onPress={() => router.replace('/Index')}>
         <Ionicons name="book" size={24} color={theme.buttonColor} />
@@ -38,11 +43,18 @@ const Layout = () => {
           />
         </TouchableOpacity>
         <TouchableOpacity 
-          style={styles.iconButton}
-          onPress={() => {/* notifications */}}
-        >
-          <Ionicons name="notifications-outline" size={24} color={theme.textColor} />
-        </TouchableOpacity>
+      style={styles.iconButton}
+      onPress={() => { router.push('/Notifications/Index') }}
+    >
+      <View>
+        <Ionicons name="notifications-outline" size={24} color={theme.textColor} />
+        {notificationCount > 0 && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{notificationCount}</Text>
+          </View>
+        )}
+      </View>
+    </TouchableOpacity>
         <TouchableOpacity 
           style={styles.iconButton}
           onPress={() => router.push('/Videos_Reels/Index')}
@@ -68,6 +80,22 @@ const Layout = () => {
     </View>
   )
   const styles = StyleSheet.create({
+    badge: {
+      position: 'absolute',
+      right: -6,
+      top: -6,
+      backgroundColor: 'red',
+      borderRadius: 10,
+      minWidth: 20,
+      height: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    badgeText: {
+      color: 'white',
+      fontSize: 12,
+      fontWeight: 'bold',
+    },
     header: {
       backgroundColor: theme.headerBackground,
       elevation: 0,
@@ -170,6 +198,13 @@ const Layout = () => {
 />
 <Stack.Screen
   name="Profile/[id]"
+  options={{
+    header: () => <CustomHeader />,
+    
+  }}
+/>
+<Stack.Screen
+  name="Notifications/Index"
   options={{
     header: () => <CustomHeader />,
     

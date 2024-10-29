@@ -13,7 +13,7 @@ const ITEM_WIDTH = width / 2 - 24
 
 const UserProfile = () => {
   const { id } = useLocalSearchParams()
-  const { token, followUser, unfollowUser, checkIsFollowing } = useContext(AuthContext)
+  const { token, followUser, unfollowUser, checkIsFollowing ,sendFollowRequest} = useContext(AuthContext)
   const { isDarkTheme } = useTheme()
   const theme = isDarkTheme ? darkTheme : lightTheme
 
@@ -60,17 +60,29 @@ const loadProfileData = async () => {
     setLoading(false);
   }
 };
-  // Update handleFollowToggle to reload data immediately after follow/unfollow
+// Update handleFollowToggle in [id].jsx
 const handleFollowToggle = async () => {
-  const success = isFollowing 
-    ? await unfollowUser(id)
-    : await followUser(id);
-  
-  if (success) {
-    setIsFollowing(!isFollowing);
-    loadProfileData(); // Reload data immediately
+  if (profileUser.is_private && !isFollowing) {
+    const request = await sendFollowRequest(id);
+    if (request) {
+      Alert.alert('Success', 'Follow request sent');
+    } else {
+      Alert.alert('Error', 'Failed to send follow request');
+    }
+  } else {
+    const success = isFollowing 
+      ? await unfollowUser(id)
+      : await followUser(id);
+    
+    if (success) {
+      setIsFollowing(!isFollowing);
+      loadProfileData();
+    }
   }
-}
+};
+
+  
+
   
 
   const styles = StyleSheet.create({
@@ -97,6 +109,9 @@ const handleFollowToggle = async () => {
     },
     userInfo: {
       flex: 1,
+      gap: 5,
+      
+      
     },
     name: {
       fontSize: 22,
@@ -104,14 +119,16 @@ const handleFollowToggle = async () => {
       color: theme.textColor,
     },
     followButton: {
-      backgroundColor: isFollowing ? theme.cardBackground : theme.primary,
+      backgroundColor: isFollowing ? theme.cardBackground : theme.cardBackground,
       padding: 10,
       borderRadius: 20,
-      borderWidth: isFollowing ? 1 : 0,
+      borderWidth: 2,
       borderColor: theme.borderColor,
+      width: 180,
+      
     },
     followButtonText: {
-      color: isFollowing ? theme.textColor : '#fff',
+      color: isFollowing ? theme.textColor : theme.textColor,
       textAlign: 'center',
       fontWeight: 'bold',
     },
@@ -143,13 +160,7 @@ const handleFollowToggle = async () => {
     },
   })
 
-  if (loading) {
-    return (
-      <View style={styles.mainContainer}>
-        <Text style={{ color: theme.textColor }}>Loading...</Text>
-      </View>
-    )
-  }
+
 
   return (
     <View style={styles.mainContainer}>
@@ -178,16 +189,17 @@ const handleFollowToggle = async () => {
           </View>
         </View>
 
-        {profileUser.is_private && !isFollowing ? (
-          <View style={styles.privateAccountMessage}>
-            <Ionicons name="lock-closed" size={50} color={theme.textColor} />
-            <Text style={styles.privateText}>
-              This account is private. Follow to see their posts.
-            </Text>
-          </View>
-        ) : (
-          <View style={styles.postsGrid}>
-            {userPosts.map((post) => (
+        {profileUser && (
+  profileUser.is_private && !isFollowing ? (
+    <View style={styles.privateAccountMessage}>
+      <Ionicons name="lock-closed" size={50} color={theme.textColor} />
+      <Text style={styles.privateText}>
+        This account is private. Follow to see their posts.
+      </Text>
+    </View>
+  ) : (
+    <View style={styles.postsGrid}>
+      {userPosts.map((post) => (
               <View key={post.id} style={styles.postCard}>
                 {post.image_url ? (
                   <Image
@@ -209,7 +221,7 @@ const handleFollowToggle = async () => {
               </View>
             ))}
           </View>
-        )}
+        ))}
       </ScrollView>
     </View>
   )

@@ -36,45 +36,72 @@ export default function Login() {
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: theme.backgroundColor,
-      padding: 24,
+      paddingHorizontal: 24,
     },
     title: {
-      fontSize: 30,
+      fontSize: 32,
       fontWeight: 'bold',
       color: theme.textColor,
-      marginBottom: 24,
+      marginBottom: 32,
+      textAlign: 'center',
     },
     errorText: {
       color: theme.dangerColor,
       marginBottom: 16,
+      textAlign: 'center',
     },
     input: {
       width: '100%',
-      padding: 12,
+      padding: 14,
       backgroundColor: theme.inputBackground,
-      borderRadius: 8,
+      borderRadius: 10,
       borderWidth: 1,
       borderColor: theme.borderColor,
       marginBottom: 16,
       color: theme.textColor,
+      fontSize: 16,
     },
     loginButton: {
       width: '100%',
       backgroundColor: theme.buttonColor,
-      padding: 12,
-      borderRadius: 8,
+      paddingVertical: 14,
+      borderRadius: 10,
       alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      elevation: 3,
+      marginBottom: 20,
     },
     loginButtonText: {
-      color: theme.textColor,
+      color: '#ffffff',
       fontWeight: 'bold',
+      fontSize: 16,
       textAlign: 'center',
     },
     signupContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
       marginTop: 16,
     },
     signupText: {
       color: theme.accentColor,
+      fontSize: 16,
+    },
+    inputContainer: {
+      width: '100%',
+      marginBottom: 20,
+    },
+    forgotPasswordText: {
+      color: theme.accentColor,
+      textAlign: 'right',
+      marginBottom: 20,
+      fontSize: 14,
+    },
+    buttonDisabled: {
+      opacity: 0.5,
     },
   });
 
@@ -84,42 +111,54 @@ export default function Login() {
 
       {error && <Text style={styles.errorText}>{error}</Text>}
 
-      <TextInput
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        style={styles.input}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        placeholderTextColor={theme.placeholderColor}
-      />
-      <TextInput
-        placeholder="Mot de passe"
-        value={password}
-        onChangeText={setPassword}
-        style={styles.input}
-        secureTextEntry
-        placeholderTextColor={theme.placeholderColor}
-      />
+      <View style={styles.inputContainer}>
+        <TextInput
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          style={styles.input}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          placeholderTextColor={theme.placeholderColor}
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <TextInput
+          placeholder="Mot de passe"
+          value={password}
+          onChangeText={setPassword}
+          style={styles.input}
+          secureTextEntry
+          placeholderTextColor={theme.placeholderColor}
+        />
+      </View>
 
       <TouchableOpacity
         onPress={handleLogin}
-        style={styles.loginButton}
+        style={[styles.loginButton, loading && styles.buttonDisabled]}
         disabled={loading}
       >
         {loading ? (
-          <ActivityIndicator color={theme.textColor} />
+          <ActivityIndicator color="#ffffff" />
         ) : (
           <Text style={styles.loginButtonText}>Se connecter</Text>
         )}
       </TouchableOpacity>
 
-      <TouchableOpacity 
-        style={styles.signupContainer} 
-        onPress={() => router.push('register')}
+      <Text
+        style={styles.forgotPasswordText}
+        onPress={() => router.push('(app)/(Login)/ForgotPassword')}
       >
-        <Text style={styles.signupText}>Pas de compte ? Inscrivez-vous</Text>
-      </TouchableOpacity>
+        Mot de passe oublié ?
+      </Text>
+
+      <View style={styles.signupContainer}>
+        <Text style={styles.signupText}>Pas de compte ? </Text>
+        <TouchableOpacity onPress={() => router.push('register')}>
+          <Text style={[styles.signupText, { fontWeight: 'bold' }]}>Inscrivez-vous</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

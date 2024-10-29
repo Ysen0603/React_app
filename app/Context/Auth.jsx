@@ -11,6 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [notificationCount, setNotificationCount] = useState(0);
 
 
   useEffect(() => {
@@ -219,7 +220,66 @@ const togglePrivacy = async () => {
     return false;
   }
 };
+const sendFollowRequest = async (userId) => {
+  try {
+    const response = await fetch(`${API_URL}/users/${userId}/follow-request`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (response.ok) {
+      return await response.json();
+    }
+    return null;
+  } catch (error) {
+    console.error('Error sending follow request:', error);
+    return null;
+  }
+};
 
+const getFollowRequests = async () => {
+  try {
+    const response = await fetch(`${API_URL}/users/me/follow-requests`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (response.ok) {
+      return await response.json();
+    }
+    return [];
+  } catch (error) {
+    console.error('Error getting follow requests:', error);
+    return [];
+  }
+};
+
+const handleFollowRequest = async (requestId, action) => {
+  try {
+    const response = await fetch(`${API_URL}/users/follow-requests/${requestId}/${action}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (response.ok) {
+      return await response.json();
+    }
+    return null;
+  } catch (error) {
+    console.error('Error handling follow request:', error);
+    return null;
+  }
+};
+
+const checkNotifications = async () => {
+  const requests = await getFollowRequests();
+  setNotificationCount(requests.length);
+};
 
   return (
     <AuthContext.Provider
@@ -238,6 +298,12 @@ const togglePrivacy = async () => {
         getAllUsers,
         checkIsFollowing,
         togglePrivacy,
+        sendFollowRequest,
+        getFollowRequests,
+        handleFollowRequest,
+        notificationCount,
+        checkNotifications,
+
       }}
     >
     {!loading && children}

@@ -1,60 +1,62 @@
-import { View, Text, StyleSheet, Image, Animated } from 'react-native'
-import React, { useContext, useEffect, useRef } from 'react'
-import { AuthContext } from './Context/Auth'
-import { router } from 'expo-router'
+import { View, Text, StyleSheet, Image, Animated, TouchableOpacity } from 'react-native';
+import React, { useContext, useEffect, useRef } from 'react';
+import { AuthContext } from './Context/Auth';
+import { router } from 'expo-router';
 
 const index = () => {
-    const { user } = useContext(AuthContext)
-    const fadeAnim = useRef(new Animated.Value(0)).current
-    
+    const { user } = useContext(AuthContext);
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+
     useEffect(() => {
         Animated.timing(fadeAnim, {
             toValue: 1,
             duration: 1000,
-            useNativeDriver: true
-        }).start()
+            useNativeDriver: true,
+        }).start();
 
         const redirect = setTimeout(() => {
-            if (!user) {
-                router.replace('(app)/(Login)/Login')
-            } else {
-                router.replace('(app)/Index')
+            if (user) {
+                router.replace('(app)/Index');
             }
-        }, 5000)
+        }, 2000);
 
-        return () => clearTimeout(redirect)
-    }, [user])
+        return () => clearTimeout(redirect);
+    }, [user]);
+
+    const handleLogin = () => {
+        router.replace('(app)/(Login)/Login');
+    };
+
+    const handleRegister = () => {
+        router.replace('(app)/(Login)/register');
+    };
+
+    if (user) {
+        return null; // Prevent showing anything if the user exists and we're redirecting
+    }
 
     return (
         <View style={styles.container}>
             <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-                <Image 
-                    source={{ uri: 'https://via.placeholder.com/150' }}
+                <Image
+                    source={require('../assets/images/Social.png')}
                     style={styles.logo}
                 />
                 <Text style={styles.title}>Welcome to SocialApp</Text>
                 <Text style={styles.subtitle}>Connect, Share, Inspire</Text>
-                
-                <View style={styles.featuresContainer}>
-                    <View style={styles.featureItem}>
-                        <Text style={styles.featureTitle}>🌟 Share Moments</Text>
-                        <Text style={styles.featureText}>Post your favorite photos and videos</Text>
-                    </View>
-                    
-                    <View style={styles.featureItem}>
-                        <Text style={styles.featureTitle}>💬 Connect</Text>
-                        <Text style={styles.featureText}>Engage with your community</Text>
-                    </View>
-                    
-                    <View style={styles.featureItem}>
-                        <Text style={styles.featureTitle}>🚀 Grow Together</Text>
-                        <Text style={styles.featureText}>Build meaningful connections</Text>
-                    </View>
+
+                <View style={styles.buttonsContainer}>
+                    <TouchableOpacity style={styles.button} onPress={handleLogin}>
+                        <Text style={styles.buttonText}>Login</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.button, styles.registerButton]} onPress={handleRegister}>
+                        <Text style={styles.buttonText}>Register</Text>
+                    </TouchableOpacity>
                 </View>
             </Animated.View>
         </View>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     container: {
@@ -84,35 +86,34 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: '#666',
         marginBottom: 40,
+        textAlign: 'center',
     },
-    featuresContainer: {
+    buttonsContainer: {
         width: '100%',
-        gap: 20,
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        marginTop: 20,
     },
-    featureItem: {
-        backgroundColor: '#f8f9fa',
-        padding: 20,
-        borderRadius: 15,
+    button: {
+        backgroundColor: '#007AFF',
+        paddingVertical: 15,
+        paddingHorizontal: 40,
+        borderRadius: 25,
         shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 3,
         elevation: 3,
     },
-    featureTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#007AFF',
-        marginBottom: 8,
+    registerButton: {
+        backgroundColor: '#4CAF50', // A different color for the Register button
     },
-    featureText: {
+    buttonText: {
+        color: '#fff',
         fontSize: 16,
-        color: '#666',
-        lineHeight: 22,
-    }
-})
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+});
 
-export default index
+export default index;
