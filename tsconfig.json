@@ -9,8 +9,12 @@
     }
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx",
+    ".expo/types/**/*.js",
+    "expo-env.d.js",
+    "app/(app)/(Login)/Login.jsx",
+    "app/_layout.jsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
   ]
