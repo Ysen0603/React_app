@@ -19,10 +19,8 @@ const Layout = () => {
       router.replace('/(Login)/Login');
     }
   }, [user]);
-
   useEffect(() => {
-    const interval = setInterval(checkNotifications, 30000); // Check every 30 seconds
-    return () => clearInterval(interval);
+    checkNotifications();
   }, []);
   const CustomHeader = () => (
     

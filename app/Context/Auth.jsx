@@ -1,6 +1,9 @@
 import React, { createContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
+import { Alert } from 'react-native';
+
+
 
 const API_URL = 'http://192.168.1.4:8000'; // Remplacez par l'adresse IP locale de votre serveur
 
@@ -12,8 +15,8 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notificationCount, setNotificationCount] = useState(0);
-
-
+  const [socket, setSocket] = useState(null);
+  const [acceptedFollows, setAcceptedFollows] = useState([]);
   useEffect(() => {
     // Charger le token stocké au démarrage
     const loadToken = async () => {
@@ -34,6 +37,57 @@ export const AuthProvider = ({ children }) => {
     loadToken();
   }, []);
 
+  useEffect(() => {
+    if (token) {
+      const ws = new WebSocket(`ws://192.168.1.4:8000/ws/notifications?token=${token}`);
+      
+      ws.onopen = () => {
+        console.log('WebSocket Connected');
+      };
+  
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'follow_request') {
+          checkNotifications();
+        }
+      };
+  
+      setSocket(ws);
+  
+      return () => {
+        if (socket) {
+          socket.close();
+        }
+      };
+    }
+  }, [token]);
+  
+  useEffect(() => {
+    if (token && user) {
+      const ws = new WebSocket(`ws://192.168.1.4:8000/ws/notifications/${user.id}`);
+      
+      ws.onopen = () => {
+        console.log('WebSocket Connected');
+      };
+  
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'follow_accepted') {
+          setAcceptedFollows(prev => [...prev, data]);
+          checkNotifications();
+        }
+      };
+  
+      setSocket(ws);
+  
+      return () => {
+        if (socket) {
+          socket.close();
+        }
+      };
+    }
+  }, [token, user]);
+  
   // Fonction pour récupérer les informations de l'utilisateur
   const fetchUser = async (token) => {
     try {
@@ -303,6 +357,8 @@ const checkNotifications = async () => {
         handleFollowRequest,
         notificationCount,
         checkNotifications,
+        acceptedFollows,
+        setAcceptedFollows,
 
       }}
     >

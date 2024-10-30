@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity, Modal, TextInput, Alert, ActivityIndicator,} from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity, Modal, TextInput, Alert, ActivityIndicator,Dimensions} from 'react-native';
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import { AuthContext } from '../Context/Auth';
 import { useTheme } from '../Context/ThemeContext';
@@ -9,7 +9,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Video} from 'expo-av';
 import VideoPlayer from './components/VideoPlayer';
 
-
+const { width,height } = Dimensions.get('window');
 
 const Index = () => {
   const [posts, setPosts] = useState([]);
@@ -45,7 +45,7 @@ const Index = () => {
       }
     }, [user, token])
   );
-
+  console.log(width)
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -138,9 +138,9 @@ const Index = () => {
     },
     header: {
       flexDirection: 'row',
-      justifyContent: 'space-between',
+      justifyContent: width > 600 ? 'space-around' : 'space-between',
       alignItems: 'center',
-      padding: 20,
+      padding: width > 600 ? 50 : 20,
       backgroundColor: theme.headerBackground,
       borderBottomWidth: 1,
       borderBottomColor: theme.borderColor,
@@ -150,37 +150,38 @@ const Index = () => {
       alignItems: 'center',
     },
     avatar: {
-      width: 50,
-      height: 50,
-      borderRadius: 25,
+      width: width > 600 ? 80 : 40,
+      height: width > 600 ? 80 : 40,
+      borderRadius: width > 600 ? 40 : 20,
       marginRight: 12,
     },
     welcomeText: {
-      fontSize: 14,
+      fontSize: width > 600 ? 24 : 16,
       color: theme.secondaryTextColor,
     },
     userName: {
-      fontSize: 18,
+      fontSize: width > 600 ? 24 : 16,
       fontWeight: 'bold',
       color: theme.textColor,
     },
     newPostButton: {
       backgroundColor: theme.buttonColor,
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+      width: width > 600 ? 75 : 40,
+      height: width > 600 ? 75 : 40,
+      borderRadius: width > 600 ? 40 : 20,
       justifyContent: 'center',
       alignItems: 'center',
     },
     container: {
       flex: 1,
-      padding: 16,
+      paddingTop: width > 600 ? 50 : 20,
+      paddingHorizontal: width > 600 ? 200: 20,
     },
     postCard: {
       backgroundColor: theme.cardBackground,
       borderRadius: 16,
       marginBottom: 16,
-      padding: 16,
+      padding: width > 600 ? 50 : 16,
       shadowColor: theme.shadowColor,
       shadowOffset: {
         width: 0,
@@ -196,9 +197,9 @@ const Index = () => {
       marginBottom: 12,
     },
     authorAvatar: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+      width: width > 600 ? 80 : 40,
+      height: width > 600 ? 80 : 40,
+      borderRadius: width > 600 ? 40 : 20,
       marginRight: 12,
     },
     postHeaderText: {
@@ -227,7 +228,7 @@ const Index = () => {
     },
     postImage: {
       width: '100%',
-      height: 200,
+      height: width > 600 ? 600 : 400,
       borderRadius: 10,
       marginBottom: 12,
     },

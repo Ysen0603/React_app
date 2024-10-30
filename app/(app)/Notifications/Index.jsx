@@ -7,7 +7,8 @@ import { lightTheme, darkTheme } from '../../themes';
 const NotificationsScreen = () => {
     const [followRequests, setFollowRequests] = useState([]);
     const [requestUsers, setRequestUsers] = useState({});
-    const { getFollowRequests, handleFollowRequest, token } = useContext(AuthContext);
+    const { getFollowRequests, handleFollowRequest, token, acceptedFollows } = useContext(AuthContext);
+
     const { isDarkTheme } = useTheme();
     const theme = isDarkTheme ? darkTheme : lightTheme;
     const { checkNotifications } = useContext(AuthContext);
@@ -16,8 +17,6 @@ const NotificationsScreen = () => {
       loadFollowRequests();
       checkNotifications();
     }, []);
-    
-    
     
     const fetchUserDetails = async (userId) => {
       try {
@@ -32,13 +31,17 @@ const NotificationsScreen = () => {
         console.error('Error fetching user details:', error);
       }
     };
+
     const handleRequest = async (requestId, action) => {
-        const result = await handleFollowRequest(requestId, action);
-        if (result) {
-          loadFollowRequests();
-          checkNotifications();
+      const result = await handleFollowRequest(requestId, action);
+      if (result) {
+        loadFollowRequests();
+        checkNotifications();
+        if (action === 'accept') {
+          console.log('Follow request accepted');
         }
-      };;
+      }
+    };
       
     const loadFollowRequests = async () => {
       const requests = await getFollowRequests();
@@ -47,11 +50,20 @@ const NotificationsScreen = () => {
         fetchUserDetails(request.follower_id);
       });
     };
-    useEffect(() => {
-        loadFollowRequests();
-      }, []);
+
+    const renderNotification = ({ item }) => {
+      if (item.type === 'follow_accepted') {
+        return (
+          <View style={styles.requestCard}>
+            <View style={styles.userContainer}>
+              <Text style={[styles.notificationText, { color: theme.textColor }]}>
+                {item.message}
+              </Text>
+            </View>
+          </View>
+        );
+      }
       
-    const renderRequest = ({ item }) => {
       const requester = requestUsers[item.follower_id];
       return (
         <View style={styles.requestCard}>
@@ -90,8 +102,7 @@ const NotificationsScreen = () => {
         </View>
       );
     };
-  
-  
+
     const styles = StyleSheet.create({
       container: {
         flex: 1,
@@ -129,9 +140,10 @@ const NotificationsScreen = () => {
       requestText: {
         fontSize: 14,
       },
-      userInfoText: {
-        fontSize: 14,
-        color: 'gray',
+      notificationText: {
+        fontSize: 16,
+        color: theme.textColor,
+        padding: 10,
       },
       buttonContainer: {
         flexDirection: 'row',
@@ -167,9 +179,9 @@ const NotificationsScreen = () => {
     return (
       <View style={styles.container}>
         <FlatList
-          data={followRequests}
-          renderItem={renderRequest}
-          keyExtractor={(item) => item.id.toString()}
+          data={[...followRequests, ...acceptedFollows]}
+          renderItem={renderNotification}
+          keyExtractor={(item) => item.id?.toString() || item.message}
         />
       </View>
     );

@@ -1,10 +1,11 @@
 import React, { useState, useRef } from 'react';
-import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Text,Dimensions } from 'react-native';
 import { Video, ResizeMode } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../Context/ThemeContext';
 import { lightTheme, darkTheme } from '../../themes';
 import { router } from 'expo-router';
+const { width,height } = Dimensions.get('window');
 
 const VideoPlayer = ({ videoUrl,videoID }) => {
   const videoRef = useRef(null);
@@ -26,7 +27,7 @@ const VideoPlayer = ({ videoUrl,videoID }) => {
   const styles = StyleSheet.create({
     videoContainer: {
       width: '100%',
-      height: 250,
+      height: width > 600 ? 800 : 350,
       backgroundColor: theme.backgroundColor,
       borderRadius: 10,
       marginVertical: 12,
